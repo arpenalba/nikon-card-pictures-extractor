@@ -16,51 +16,83 @@ def RenameAndMoveToDestinantionFolder():
         if isdir(join(TEMP_PATH, folder)):
 
             if CreateFolder(join(DESTINATION_PATH, folder)):
-                fileId = 0
+                fileId = 1
             else:
                 fileId = getFileIdFromFolder(join(DESTINATION_PATH, folder))
 
-            for file in listdir(join(TEMP_PATH, folder)):
-                if isfile(join(join(TEMP_PATH, folder), file)):
-                    newFileName = GetNewFileName(file, folder, fileId)
-                    rename(join(join(TEMP_PATH, folder), file), join(join(DESTINATION_PATH, folder), newFileName))
+            for f in listdir(join(TEMP_PATH, folder)):
+                if isfile(join(join(TEMP_PATH, folder), f)):
+                    newFileName = GetNewFileName(f, folder, fileId)
+                    rename(join(join(TEMP_PATH, folder), f), join(join(DESTINATION_PATH, folder), newFileName))
                 else:
-                    print('WARNING 03: Found folder ' + join(join(TEMP_PATH, folder), file) + ' and wasn\'t expected , please check it.')
+                    print('WARNING 03: Found folder ' + join(join(TEMP_PATH, folder), f) + ' and wasn\'t expected , please check it.')
                     quit()
         else:
-            print('WARNING 02: Found file ' + join(TEMP_PATH, folder) + ' and wasn\'t expected , please check it.')
+            print('WARNING 02: Found f ' + join(TEMP_PATH, folder) + ' and wasn\'t expected , please check it.')
+
+def GetStringFileId(fileId):
+    if fileId < 10:
+        return '000' + str(fileId)
+    elif fileId < 100:
+        return '00' + str(fileId)
+    elif fileId < 1000:
+        return '0' + str(fileId)
+    else:
+        return str(fileId)
             
 def GetNewFileName(originalName, dateString, fileId):
-    print ('GetNewFileName ' + originalName + ' ' + dateString + ' ' + fileId)
+    stringFileId = GetStringFileId(fileId)
+    return dateString + '-' + stringFileId + '-' + originalName[0] + originalName[1] + originalName[2] + '.' + originalName.split('.')[1]
     
 def getFileIdFromFolder(path):
-    print ('GetFileIdFromFolder ' + path)
+    fileId = 1
+    for f in listdir(path):
+        if isfile(join(path, f)):
+            if int(f.split('-')[1]) >= fileId:
+                fileId=int(f.split('-')[1])+1
+        else:
+            print('WARNING 04: Found folder ' + join(originPath, f) + ' and wasn\'t expected , please check it.')
+
 
 
 def MoveFilesToTemp(originPath):
-    for file in listdir(originPath):
-        if isfile(join(originPath, file)):
-            originFileDate = gmtime(getmtime(join(originPath, file)))
-            path2move = join(TEMP_PATH, str(originFileDate)[0] + str(originFileDate)[1] + str(originFileDate)[2])
+    for f in listdir(originPath):
+        if isfile(join(originPath, f)):
+            path2move = join(TEMP_PATH, GetDateString(join(originPath, f)))
             CreateFolder(path2move)
-            move(join(originPath, file), join(path2move, file))
+            move(join(originPath, f), join(path2move, f))
         else:
-            print('WARNING 01: Found folder ' + join(originPath, file) + ' and wasn\'t expected , please check it.')
-        
+            print('WARNING 01: Found folder ' + join(originPath, f) + ' and wasn\'t expected , please check it.')
 
+def GetDateString(path):
+    fileDate = gmtime(getmtime(path))
+
+    year = str(fileDate[0])
+
+    if fileDate[1] < 10:
+        month = '0' + str(fileDate[1])
+    else:
+        month = str(fileDate[1])
+
+    if fileDate[2] < 10:
+        day = '0' + str(fileDate[2])
+    else:
+        day = str(fileDate[2])
+
+    return year + month + day
+
+def CreateTemporalFolder():
+    if not CreateFolder(TEMP_PATH):
+        if listdir(TEMP_PATH).__len__() > 0:
+            print('ERROR 03: ' + TEMP_PATH + ' was expected to be empty, please check it.')
+            quit()
+        
 def CreateFolder(path):
     if not exists(path):
         makedirs(path)
         return True
     else:
         return False
-
-def CreateTemporalFolder():
-    if not CreateFolder(TEMP_PATH):
-        if listdir(TEMP_PATH).__len__ > 0:
-            print('ERROR 03: ' + TEMP_PATH + ' was expected to be empty, please check it.')
-            quit()
-
 
 def GetOriginPath():
     if argv.__len__() < 2:

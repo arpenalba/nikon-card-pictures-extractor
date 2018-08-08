@@ -1,3 +1,3 @@
-ORIGIN_PATH = ':\\Users\\aromeropenalba\\Desktop\\origin'
-DESTINATION_PATH = 'D:\\Temp\\nikon-test'
-TEMP_PATH = 'D:\\Temp\\nikon-test\\temp'
+ORIGIN_PATH = ':\\test'
+DESTINATION_PATH = 'D:\\Fotos Nikon'
+TEMP_PATH = 'D:\\Fotos Nikon\\temp'
