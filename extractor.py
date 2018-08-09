@@ -11,16 +11,26 @@ from config import ORIGIN_PATH, DESTINATION_PATH, TEMP_PATH
 # 3	tm_hour	range [0, 23]
 # 4	tm_min	range [0, 59]
 
+def RemoveTempFolders(path):
+    for folder in listdir(path):
+        if isdir(join(path, folder)):
+            RemoveTempFolders(join(path, folder))
+        else:
+            print('ERROR 04: Found f ' + join(path, folder) + ' and wasn\'t expected , please delete it manualy.')
+            quit()
+    rmdir(path)
+
 def RenameAndMoveToDestinantionFolder():
     for folder in listdir(TEMP_PATH):
         if isdir(join(TEMP_PATH, folder)):
 
             if CreateFolder(join(DESTINATION_PATH, folder)):
-                fileId = 1
+                fileId = 0
             else:
                 fileId = getFileIdFromFolder(join(DESTINATION_PATH, folder))
 
             for f in listdir(join(TEMP_PATH, folder)):
+                fileId += 1
                 if isfile(join(join(TEMP_PATH, folder), f)):
                     newFileName = GetNewFileName(f, folder, fileId)
                     rename(join(join(TEMP_PATH, folder), f), join(join(DESTINATION_PATH, folder), newFileName))
@@ -45,13 +55,14 @@ def GetNewFileName(originalName, dateString, fileId):
     return dateString + '-' + stringFileId + '-' + originalName[0] + originalName[1] + originalName[2] + '.' + originalName.split('.')[1]
     
 def getFileIdFromFolder(path):
-    fileId = 1
+    fileId = 0
     for f in listdir(path):
         if isfile(join(path, f)):
-            if int(f.split('-')[1]) >= fileId:
-                fileId=int(f.split('-')[1])+1
+            if int(f.split('-')[1]) > fileId:
+                fileId=int(f.split('-')[1])
         else:
-            print('WARNING 04: Found folder ' + join(originPath, f) + ' and wasn\'t expected , please check it.')
+            print('WARNING 04: Found folder ' + join(path, f) + ' and wasn\'t expected , please check it.')
+    return fileId
 
 
 
@@ -121,7 +132,8 @@ def main():
     # Rename the files and move to their destination folder
     RenameAndMoveToDestinantionFolder()
 
-    rmdir(TEMP_PATH)
+    # Remove all temporal empty folders
+    RemoveTempFolders(TEMP_PATH)
 
 if __name__ == "__main__":
     main()
